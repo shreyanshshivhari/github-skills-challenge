@@ -20,7 +20,6 @@ resource usage, then converts them into events for operational response.
 The workflow is simple: the data is checked, an event is created for an
 anomaly, the producer sends it to the topic, and the consumer passes it to the
 AIOps output.
-
 ### Data observations
 
 - Timestamps are ISO-8601, one record per minute from `10:00` to `10:09`.
