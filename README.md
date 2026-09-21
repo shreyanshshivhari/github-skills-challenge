@@ -33,6 +33,20 @@ Data -> Detect -> Produce -> Topic -> Consume -> AIOps output
   - `10:06`: 640 ms, 94% CPU, 91% memory; database timeout (`ERROR`).
 - Detection thresholds: latency >500 ms, CPU >80%, memory >80%.
 
+### Part 3: Detection report
+
+- Processed: 10 records.
+- Detected: 2 anomalies (`10:05`, `10:06`).
+- Reasons:
+  - `10:05`: high response time; `ERROR` payment timeout; 610 ms, 75% CPU,
+    70% memory.
+  - `10:06`: high response time, high CPU, high memory; `ERROR` database
+    timeout; 640 ms, 94% CPU, 91% memory.
+- Normal records were not flagged.
+- No metric anomaly was missed.
+- Limitation: the detector checks for `WARNING`, not `ERROR`, so error logs are
+  not flagged directly. Improvement: include `ERROR` as a concerning log level.
+
 ### Run
 
 ```bash
