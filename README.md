@@ -47,6 +47,22 @@ Data -> Detect -> Produce -> Topic -> Consume -> AIOps output
 - Limitation: the detector checks for `WARNING`, not `ERROR`, so error logs are
   not flagged directly. Improvement: include `ERROR` as a concerning log level.
 
+### Part 4: Event-flow verification
+
+- **Event/message:** anomaly record containing timestamp, service, reasons, and
+  source data.
+- **Producer:** publishes each detected event.
+- **Topic:** shared in-memory `anomaly-events` queue.
+- **Consumer:** reads events from that topic.
+- **AIOps output:** `run_pipeline()` returns the consumed events for reporting.
+
+Execution result: both detected anomalies were published, consumed, and
+returned downstream. The complete flow passed through the shared topic:
+
+```text
+Detector (2) -> Producer -> anomaly-events -> Consumer (2) -> AIOps output (2)
+```
+
 ### Run
 
 ```bash
@@ -55,9 +71,8 @@ python -m pytest --verbose
 python src/aiops_pipeline.py
 ```
 
-Expected result: 10 records processed and 2 anomalies detected. The supplied
-baseline reports 0 consumed events because producer and consumer use different
-in-memory topics.
+Expected result: 10 records processed, 2 anomalies detected, and 2 events
+consumed by the downstream AIOps output.
 
 ---
 
