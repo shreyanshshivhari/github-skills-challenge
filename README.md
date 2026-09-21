@@ -55,6 +55,7 @@
   to the consumer and AIOps output.
 - Task 5: found and fixed the incorrect log-level check and the topic mismatch.
 - Task 6: ran the complete pipeline and confirmed 2 consumed events.
+- Task 8: ran the provided tests and checked the final pipeline output.
 - The source files and test files were kept in the original project structure.
 - The workflow was tested from the repository root using Python and pytest.
 
@@ -85,3 +86,12 @@ consumed.
 
 For evidence, screenshots can show the data file, anomaly output, event
 publish/consume output, final pipeline output, and the passing test results.
+
+## Validation
+
+- Run `python -m pytest --verbose` to check the detector, producer, topic,
+  consumer, and full pipeline tests.
+- Run `python src/aiops_pipeline.py` to check the final workflow.
+- The validation result was 9 tests passed.
+- The final workflow processed 10 records, found 2 anomalies, and consumed
+  2 events successfully.
