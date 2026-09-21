@@ -7,18 +7,19 @@
 This project monitors a `payment-service`. AIOps detects slow requests and high
 resource usage, then converts them into events for operational response.
 
-### Components and workflow
+### Main files
 
-- Data: [`data/service_data.json`](data/service_data.json)
-- Detection: [`src/anomaly_detector.py`](src/anomaly_detector.py)
-- Producer/topic/consumer: [`src/event_producer.py`](src/event_producer.py),
-  [`src/event_topic.py`](src/event_topic.py), [`src/event_consumer.py`](src/event_consumer.py)
-- Pipeline: [`src/aiops_pipeline.py`](src/aiops_pipeline.py)
-- Tests: [`tests/test_aiops_pipeline.py`](tests/test_aiops_pipeline.py)
+- [`data/service_data.json`](data/service_data.json) contains the service data.
+- [`src/anomaly_detector.py`](src/anomaly_detector.py) checks for anomalies.
+- [`src/event_producer.py`](src/event_producer.py) sends anomaly events.
+- [`src/event_topic.py`](src/event_topic.py) stores events in memory.
+- [`src/event_consumer.py`](src/event_consumer.py) receives events.
+- [`src/aiops_pipeline.py`](src/aiops_pipeline.py) runs the full process.
+- [`tests/test_aiops_pipeline.py`](tests/test_aiops_pipeline.py) tests the code.
 
-```text
-Data -> Detect -> Produce -> Topic -> Consume -> AIOps output
-```
+The workflow is simple: the data is checked, an event is created for an
+anomaly, the producer sends it to the topic, and the consumer passes it to the
+AIOps output.
 
 ### Data observations
 
@@ -44,24 +45,16 @@ Data -> Detect -> Produce -> Topic -> Consume -> AIOps output
     timeout; 640 ms, 94% CPU, 91% memory.
 - Normal records were not flagged.
 - No metric anomaly was missed.
-- Limitation: the detector checks for `WARNING`, not `ERROR`, so error logs are
-  not flagged directly. Improvement: include `ERROR` as a concerning log level.
+- Error logs are now flagged as concerning events.
 
-### Part 4: Event-flow verification
+### Part 4: Event-flow check
 
-- **Event/message:** anomaly record containing timestamp, service, reasons, and
-  source data.
-- **Producer:** publishes each detected event.
-- **Topic:** shared in-memory `anomaly-events` queue.
-- **Consumer:** reads events from that topic.
-- **AIOps output:** `run_pipeline()` returns the consumed events for reporting.
-
-Execution result: both detected anomalies were published, consumed, and
-returned downstream. The complete flow passed through the shared topic:
-
-```text
-Detector (2) -> Producer -> anomaly-events -> Consumer (2) -> AIOps output (2)
-```
+- An event contains the timestamp, service name, reasons, and original record.
+- The producer sends every detected event.
+- The `anomaly-events` topic stores the events.
+- The consumer reads events from the same topic.
+- The pipeline returns the consumed events as the AIOps result.
+- Both detected anomalies were sent, received, and returned successfully.
 
 ### Run
 
@@ -73,6 +66,18 @@ python src/aiops_pipeline.py
 
 Expected result: 10 records processed, 2 anomalies detected, and 2 events
 consumed by the downstream AIOps output.
+
+### Part 5: Problems found and fixed
+
+- The detector was checking for `WARNING`, but the data contained `ERROR`.
+  I changed it to recognise both levels. The two error records now include a
+  log-related reason.
+- The producer and consumer were using different topics. Because of this, the
+  consumer received no events. I changed the pipeline so both use the shared
+  `anomaly-events` topic.
+- After these fixes, the complete workflow works as expected.
+- The final check passed all 9 tests.
+- The pipeline processed 10 records, found 2 anomalies, and consumed 2 events.
 
 ---
 

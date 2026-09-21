@@ -40,6 +40,7 @@ def test_anomalous_record_is_detected():
 
     assert event is not None
     assert event["type"] == "ANOMALY"
+    assert "Concerning log level" in event["reasons"]
 
 
 def test_producer_publishes_event():
